@@ -251,6 +251,10 @@
         // Fit after the holder becomes visible so measurements are correct.
         requestAnimationFrame(function () {
           forEachLeaf(tab.root, function (p) { p.term.fit(); });
+          // Don't steal focus from an in-progress tab rename (the click that
+          // precedes a rename dblclick lands here after the input appears).
+          var ae = document.activeElement;
+          if (ae && ae.classList && ae.classList.contains('tab-rename-input')) return;
           if (tab.activePane) tab.activePane.term.focus();
         });
       }

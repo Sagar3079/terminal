@@ -93,12 +93,15 @@
       }
     });
 
+    // Capture phase: xterm swallows keydown at its textarea before it can
+    // bubble back to the document, so intercept the shortcut on the way down.
     document.addEventListener('keydown', function (e) {
       if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 'f' || e.key === 'F')) {
         e.preventDefault();
+        e.stopPropagation();
         toggle();
       }
-    });
+    }, true);
 
     return { toggle: toggle };
   };
