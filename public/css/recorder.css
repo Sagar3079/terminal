@@ -1,0 +1,237 @@
+/* WebTerm — recorder modal + .cast player. Dark styling to match terminal.css. */
+
+/* Topbar record button while the active session is recording (class set by recorder.js) */
+#recorder-btn.recording {
+  color: #f85149;
+  border-color: rgba(248, 81, 73, 0.6);
+  animation: recorder-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes recorder-pulse {
+  0%, 100% { background: rgba(248, 81, 73, 0.08); }
+  50% { background: rgba(248, 81, 73, 0.28); }
+}
+
+/* ---------- Modal ---------- */
+
+.recorder-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50; /* above terminals, below #toast */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: max(6vh, 16px) 12px 16px;
+  background: rgba(0, 0, 0, 0.55);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.recorder-content {
+  width: min(720px, 100%);
+  max-height: calc(100dvh - max(6vh, 16px) - 16px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg, #0d1117) 92%, #000);
+  color: var(--fg, #c9d1d9);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.recorder-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.recorder-titlebar h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.recorder-content button,
+.recorder-content a.rec-act {
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  border-radius: 8px;
+  background: rgba(128, 128, 128, 0.12);
+  color: var(--fg, #c9d1d9);
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.recorder-content button:hover,
+.recorder-content a.rec-act:hover {
+  background: rgba(128, 128, 128, 0.25);
+}
+
+.recorder-content button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.recorder-close {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  line-height: 1;
+}
+
+.recorder-section h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.65;
+}
+
+/* ---------- Section 1: live recording controls ---------- */
+
+.recorder-live {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.recorder-live-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  opacity: 0.85;
+  overflow-wrap: anywhere;
+}
+
+.recorder-rec-btn {
+  min-height: 34px;
+  padding: 6px 14px;
+}
+
+.recorder-rec-btn.recording {
+  color: #f85149;
+  border-color: rgba(248, 81, 73, 0.6);
+  background: rgba(248, 81, 73, 0.12);
+}
+
+.recorder-rec-btn.recording:hover {
+  background: rgba(248, 81, 73, 0.25);
+}
+
+/* ---------- Section 2: recordings list ---------- */
+
+.recorder-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.recorder-empty {
+  font-size: 13px;
+  opacity: 0.6;
+  padding: 4px 2px;
+}
+
+.rec-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(128, 128, 128, 0.18);
+  border-radius: 8px;
+  background: rgba(128, 128, 128, 0.07);
+}
+
+.rec-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rec-name {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.rec-meta {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.rec-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rec-act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  line-height: 1;
+}
+
+.rec-act-danger:hover {
+  background: rgba(248, 81, 73, 0.25) !important;
+  border-color: rgba(248, 81, 73, 0.6);
+}
+
+/* ---------- Player ---------- */
+
+.recorder-player {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.recorder-player-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.recorder-player-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recorder-progress {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
+.recorder-term {
+  overflow: auto;
+  padding: 6px;
+  border-radius: 8px;
+  background: #0d1117;
+}
