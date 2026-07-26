@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>WebTerm</title>
+  <link rel="stylesheet" href="/vendor/xterm/css/xterm.css">
+  <link rel="stylesheet" href="/static/css/terminal.css">
+</head>
+<body>
+  <header id="topbar">
+    <div id="tabbar"></div>
+    <button id="new-tab-btn" title="New terminal" aria-label="New terminal">+</button>
+    <div id="topbar-actions">
+      <button id="settings-btn" title="Settings" aria-label="Settings">&#9881;</button>
+      <button id="logout-btn">Logout</button>
+    </div>
+  </header>
+  <main id="terms"></main>
+  <div id="mobile-bar"></div>
+  <div id="settings-panel" class="hidden"></div>
+  <script src="/vendor/xterm/lib/xterm.js"></script>
+  <script src="/vendor/addon-fit/lib/addon-fit.js"></script>
+  <script src="/vendor/addon-web-links/lib/addon-web-links.js"></script>
+  <script src="/static/js/themes.js"></script>
+  <script src="/static/js/term.js"></script>
+  <script src="/static/js/mobilebar.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

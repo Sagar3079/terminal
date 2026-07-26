@@ -1,0 +1,313 @@
+/* WebTerm — terminal page chrome. Dark by default; JS retints via --bg/--fg. */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  --bg: #0d1117;
+  --fg: #c9d1d9;
+  margin: 0;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ---------- Top bar ---------- */
+
+#topbar {
+  flex: 0 0 auto;
+  height: 44px;
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  padding: 0 6px;
+  background: color-mix(in srgb, var(--bg) 85%, #000);
+  border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+}
+
+#tabbar {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+#tabbar::-webkit-scrollbar {
+  height: 4px;
+}
+
+#tabbar::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.4);
+  border-radius: 2px;
+}
+
+.tab {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 6px 0 12px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg);
+  opacity: 0.65;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.tab:hover {
+  opacity: 0.9;
+  background: rgba(128, 128, 128, 0.12);
+}
+
+.tab.active {
+  opacity: 1;
+  background: rgba(128, 128, 128, 0.18);
+  border-color: rgba(128, 128, 128, 0.3);
+}
+
+.tab-title {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Connection status set by app.js on the tab element */
+.tab.reconnecting .tab-title {
+  color: #d29922;
+}
+
+.tab.closed .tab-title {
+  color: #f85149;
+}
+
+.tab-close {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.tab-close:hover {
+  background: rgba(248, 81, 73, 0.25);
+  color: #f85149;
+}
+
+#new-tab-btn {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#new-tab-btn:hover {
+  background: rgba(128, 128, 128, 0.18);
+}
+
+#topbar-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#topbar-actions button {
+  height: 34px;
+  min-width: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#topbar-actions button:hover {
+  background: rgba(128, 128, 128, 0.18);
+}
+
+#settings-btn {
+  font-size: 16px;
+}
+
+/* ---------- Terminal area ---------- */
+
+#terms {
+  flex: 1 1 auto;
+  position: relative;
+  min-height: 0;
+}
+
+.term-holder {
+  position: absolute;
+  inset: 0;
+  padding: 4px 2px 4px 6px;
+  overflow: hidden;
+}
+
+.term-holder.hidden {
+  display: none;
+}
+
+.term-holder .terminal,
+.term-holder .xterm {
+  height: 100%;
+}
+
+/* ---------- Mobile key bar ---------- */
+
+#mobile-bar {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px calc(4px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--bg) 85%, #000);
+  border-top: 1px solid rgba(128, 128, 128, 0.25);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+#mobile-bar::-webkit-scrollbar {
+  display: none;
+}
+
+#mobile-bar > * {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+}
+
+.mkey {
+  flex: 0 0 auto;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 8px;
+  background: rgba(128, 128, 128, 0.1);
+  color: var(--fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: background 0.1s;
+}
+
+.mkey:active {
+  background: rgba(128, 128, 128, 0.35);
+}
+
+.mkey.active {
+  background: #1f6feb;
+  border-color: #1f6feb;
+  color: #fff;
+}
+
+/* ---------- Settings panel ---------- */
+
+#settings-panel {
+  position: fixed;
+  top: 52px;
+  right: 8px;
+  z-index: 100;
+  width: min(300px, calc(100vw - 16px));
+  padding: 16px;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg) 92%, #000);
+  color: var(--fg);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+#settings-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+#settings-panel select,
+#settings-panel input {
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  border-radius: 8px;
+  background: rgba(128, 128, 128, 0.1);
+  color: var(--fg);
+  font-size: 14px;
+}
+
+#settings-panel select:focus,
+#settings-panel input:focus {
+  outline: 2px solid #1f6feb;
+  outline-offset: -1px;
+}
+
+#settings-panel button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  border-radius: 8px;
+  background: rgba(128, 128, 128, 0.15);
+  color: var(--fg);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#settings-panel button:hover {
+  background: rgba(128, 128, 128, 0.28);
+}
