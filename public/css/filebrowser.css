@@ -1,0 +1,216 @@
+/* WebTerm — file browser slide-over panel */
+
+#filebrowser-panel {
+  position: fixed;
+  top: 45px; /* below #topbar (44px + border) so toolbar stays clickable */
+  right: 0;
+  bottom: 0;
+  z-index: 50; /* above terminals, below #toast (60) */
+  width: 320px;
+  max-width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--bg, #0d1117) 92%, #000);
+  color: var(--fg, #c9d1d9);
+  border-left: 1px solid rgba(128, 128, 128, 0.3);
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.45);
+}
+
+#filebrowser-panel.hidden {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  #filebrowser-panel {
+    width: 100%;
+    border-left: none;
+  }
+}
+
+/* ---------- Header ---------- */
+
+.fb-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.25);
+}
+
+.fb-crumbs {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+.fb-crumbs::-webkit-scrollbar {
+  display: none;
+}
+
+.fb-crumb {
+  flex: 0 0 auto;
+  border: none;
+  background: transparent;
+  color: var(--fg, #c9d1d9);
+  font: inherit;
+  padding: 4px 2px;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.75;
+}
+
+button.fb-crumb:hover {
+  opacity: 1;
+  background: rgba(128, 128, 128, 0.18);
+}
+
+.fb-crumb-current {
+  opacity: 1;
+  font-weight: 600;
+  cursor: default;
+}
+
+.fb-crumb-sep {
+  flex: 0 0 auto;
+  opacity: 0.4;
+  padding: 0 1px;
+}
+
+.fb-iconbtn {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg, #c9d1d9);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.fb-iconbtn:hover {
+  background: rgba(128, 128, 128, 0.18);
+}
+
+/* ---------- Status (fallback when window.toast is unavailable) ---------- */
+
+.fb-status {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+  overflow-wrap: anywhere;
+}
+
+.fb-status.error {
+  color: #ff7b72;
+}
+
+/* ---------- Entry list ---------- */
+
+.fb-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 0;
+}
+
+.fb-loading .fb-body {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.fb-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 4px 12px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  transition: background 0.1s;
+}
+
+.fb-row:hover,
+.fb-row:active {
+  background: rgba(128, 128, 128, 0.14);
+}
+
+.fb-row-inert {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.fb-row-inert:hover,
+.fb-row-inert:active {
+  background: transparent;
+}
+
+.fb-icon {
+  flex: 0 0 auto;
+  width: 20px;
+  text-align: center;
+}
+
+.fb-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.fb-meta {
+  flex: 0 0 auto;
+  font-size: 11px;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.fb-empty {
+  padding: 12px;
+  font-size: 12px;
+  opacity: 0.55;
+  text-align: center;
+}
+
+/* ---------- Footer ---------- */
+
+.fb-footer {
+  flex: 0 0 auto;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(128, 128, 128, 0.25);
+}
+
+.fb-upload-btn {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  border-radius: 8px;
+  background: rgba(128, 128, 128, 0.15);
+  color: var(--fg, #c9d1d9);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.fb-upload-btn:hover {
+  background: rgba(128, 128, 128, 0.28);
+}

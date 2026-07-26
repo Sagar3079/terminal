@@ -1,0 +1,170 @@
+# WebTerm
+
+A self-hosted web terminal you can open from any browser — your PC, your phone, your tablet. Think ttyd or Wetty, but nicer: tabs, themes, sessions that survive disconnects, and a mobile key bar that makes shell work on a phone actually pleasant.
+
+No build step, no frontend framework. Plain Node.js + Express + WebSockets + xterm.js.
+
+## Features
+
+- **Mobile-friendly** — responsive layout, touch-sized controls, and an on-screen key bar with Esc, Tab, arrows, sticky Ctrl/Alt combos, Paste, and more
+- **Tabs** — run multiple shells side by side, just like a desktop terminal
+- **Reconnectable sessions** — PTY sessions live on the server and survive dropped connections; close your laptop, reopen the page, and pick up right where you left off (scrollback included)
+- **Themes** — dark, light, Dracula, Solarized Dark, and Monokai, plus adjustable font size
+- **Password login** — bcrypt-hashed password, rate-limited login, session cookies
+- **Auto-reconnect** — flaky wifi? The client re-attaches with exponential backoff
+- **File transfer** — upload files from your device to the server and download files back, right from the toolbar
+- **File browser** — slide-out panel to browse server files, download with a tap, and upload into any directory
+- **Built-in HTTPS** — bring your own certificate or let WebTerm generate a self-signed one
+- **Split panes** — split any terminal horizontally or vertically (up to 4 panes per tab)
+- **Tab renaming** — double-click (or long-press) a tab title; names are stored server-side and survive reconnects
+- **Search** — Ctrl+F searches the scrollback of the active terminal
+- **Command snippets** — save commands you type often and run them from a palette (great on phones)
+- **Session recording** — record terminals to asciinema-compatible `.cast` files and replay them in the browser
+- **Activity & bell badges** — background tabs light up when output or a bell arrives
+- **Copy button** — one tap to copy the current terminal selection (handy on mobile)
+- **Bundled fonts & more themes** — JetBrains Mono and Fira Code ship with the app; 10 themes plus a custom theme editor
+- **PWA** — install to your phone's home screen for a fullscreen, app-like terminal
+- **WebGL rendering** — smooth scrolling for heavy output, with automatic DOM fallback
+
+## Quick start
+
+```bash
+npm install
+node bin/set-password.js   # choose your login password (min 8 chars)
+npm start
+```
+
+Then open [http://localhost:3000](http://localhost:3000) and log in.
+
+Alternatively, set the password non-interactively on first run:
+
+```bash
+WEBTERM_PASSWORD='your-secret-password' npm start
+```
+
+## Access from your phone
+
+1. Make sure your phone and PC are on the same wifi network.
+2. Find your PC's LAN IP (e.g. `ip addr` on Linux, `ipconfig` on Windows).
+3. On your phone, open `http://<pc-ip>:3000` (for example `http://192.168.1.42:3000`).
+4. Log in — the mobile key bar appears automatically on touch devices.
+
+Tip: "Add to Home Screen" in your mobile browser gives you an app-like fullscreen terminal.
+
+## File transfer
+
+- **Upload (⇧)**: pick one or more files from your device; they're saved to your home directory on the server (change with `WEBTERM_UPLOAD_DIR`). Uploads are capped at 1 GiB per file by default (`WEBTERM_MAX_UPLOAD_MB`).
+- **Download (⇩)**: enter a file path (absolute, or relative to home, `~` works) and the file is sent to your browser's downloads.
+
+Both endpoints require a logged-in session.
+
+## HTTPS
+
+Three ways to run WebTerm over TLS:
+
+```bash
+# 1. Your own certificate (e.g. from Let's Encrypt or your CA)
+WEBTERM_TLS_CERT=/path/to/fullchain.pem WEBTERM_TLS_KEY=/path/to/privkey.pem npm start
+
+# 2. Auto-generated self-signed certificate (stored in data/tls/, requires openssl)
+WEBTERM_TLS=selfsigned npm start
+```
+
+3. Or terminate TLS in front of WebTerm with a reverse proxy / tunnel (see Security below).
+
+With a self-signed certificate your browser shows a one-time warning — expected, since nobody vouches for the cert. The connection is still encrypted. For phones this beats plain HTTP on any network you don't fully trust.
+
+## Security
+
+WebTerm gives whoever logs in **a full shell on your machine**. Treat it accordingly:
+
+- **Never expose plain HTTP to the internet.** The login password and everything you type would travel unencrypted. Do not port-forward raw HTTP from your router.
+- If you want remote access, use one of:
+  - **[Tailscale](https://tailscale.com/)** (easiest): both devices join your tailnet, and you connect over the private WireGuard network — no ports exposed at all.
+  - **[Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)**: outbound-only tunnel with TLS and optional access policies.
+  - **A reverse proxy with TLS** (Caddy, nginx + Let's Encrypt) in front of WebTerm.
+- Pick a strong password. Login is rate-limited (5 failures per 15 minutes per IP), but a strong password is still your main defense.
+- On a LAN you trust, plain HTTP is a reasonable trade-off; anywhere else, HTTPS is a must.
+
+## Configuration
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `PORT` | `3000` | HTTP listen port |
+| `HOST` | `0.0.0.0` | Listen address (`127.0.0.1` to restrict to localhost) |
+| `WEBTERM_SHELL` | `$SHELL` or `/bin/bash` | Shell to spawn for each terminal session |
+| `WEBTERM_PASSWORD` | – | If no password is set yet, sets it on startup (handy for containers) |
+| `WEBTERM_UPLOAD_DIR` | `$HOME` | Directory where uploaded files are saved |
+| `WEBTERM_MAX_UPLOAD_MB` | `1024` | Maximum upload size in MiB |
+| `WEBTERM_TLS_CERT` / `WEBTERM_TLS_KEY` | – | Paths to a TLS certificate and key; set both to serve HTTPS |
+| `WEBTERM_TLS` | – | Set to `selfsigned` to auto-generate a certificate into `data/tls/` |
+
+State lives in `data/` (password hash and session secret), created automatically with restrictive permissions.
+
+## Testing
+
+```bash
+npm test
+```
+
+Runs the smoke test (`test/smoke.js`): boots the server on a scratch port, then checks login, auth gating, the sessions API, WebSocket auth, terminal I/O, and session re-attach.
+
+## Run as a service (systemd)
+
+```ini
+# /etc/systemd/system/webterm.service
+[Unit]
+Description=WebTerm web terminal
+After=network.target
+
+[Service]
+Type=simple
+User=youruser
+WorkingDirectory=/home/youruser/terminal
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+Environment=PORT=3000
+Environment=HOST=127.0.0.1
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl enable --now webterm
+```
+
+(The example binds to `127.0.0.1`, assuming a TLS reverse proxy or Tailscale in front.)
+
+## Project structure
+
+```
+terminal/
+├── package.json
+├── server.js              # HTTP + WebSocket server, wiring
+├── bin/
+│   └── set-password.js    # interactive password setup CLI
+├── lib/
+│   ├── config.js          # config + session secret management
+│   ├── auth.js            # sessions, bcrypt password, rate limiting
+│   ├── pty-manager.js     # PTY lifecycle + scrollback buffers
+│   └── ws-handler.js      # WebSocket protocol handler
+├── public/
+│   ├── login.html         # login page
+│   ├── index.html         # terminal app shell
+│   ├── css/
+│   │   ├── login.css
+│   │   └── terminal.css
+│   └── js/
+│       ├── themes.js      # themes + settings panel
+│       ├── term.js        # TermSession: xterm + WebSocket + reconnect
+│       ├── mobilebar.js   # on-screen key bar for touch devices
+│       └── app.js         # boot + tab manager
+├── test/
+│   └── smoke.js           # end-to-end smoke test
+└── data/                  # created at runtime: password hash, session secret
+```
+
+## License
+
+MIT — do whatever you like, at your own risk.

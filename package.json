@@ -1,0 +1,29 @@
+{
+  "name": "webterm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Self-hosted web terminal with tabs, themes, reconnectable sessions, and a mobile key bar",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/smoke.js && node test/smoke-extras.js && node test/smoke-features.js",
+    "set-password": "node bin/set-password.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "ws": "^8.18.0",
+    "node-pty": "^1.0.0",
+    "bcryptjs": "^2.4.3",
+    "@xterm/xterm": "^5.5.0",
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/addon-web-links": "^0.11.0",
+    "@xterm/addon-search": "^0.15.0",
+    "@xterm/addon-webgl": "^0.18.0",
+    "@fontsource/jetbrains-mono": "^5.0.0",
+    "@fontsource/fira-code": "^5.0.0"
+  }
+}

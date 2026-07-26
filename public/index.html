@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>WebTerm</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0d1117">
+  <link rel="icon" href="/icons/icon.svg">
+  <link rel="stylesheet" href="/vendor/xterm/css/xterm.css">
+  <link rel="stylesheet" href="/static/css/fonts.css">
+  <link rel="stylesheet" href="/static/css/terminal.css">
+  <link rel="stylesheet" href="/static/css/searchbar.css">
+  <link rel="stylesheet" href="/static/css/filebrowser.css">
+  <link rel="stylesheet" href="/static/css/snippets.css">
+  <link rel="stylesheet" href="/static/css/recorder.css">
+</head>
+<body>
+  <header id="topbar">
+    <div id="tabbar"></div>
+    <button id="new-tab-btn" title="New terminal" aria-label="New terminal">+</button>
+    <div id="topbar-actions">
+      <button id="split-h-btn" title="Split horizontally" aria-label="Split horizontally">&#11020;</button>
+      <button id="split-v-btn" title="Split vertically" aria-label="Split vertically">&#11021;</button>
+      <button id="search-btn" title="Search scrollback" aria-label="Search scrollback">&#128269;</button>
+      <button id="copy-btn" title="Copy selection" aria-label="Copy selection">&#10697;</button>
+      <button id="filebrowser-btn" title="File browser" aria-label="File browser">&#128193;</button>
+      <button id="snippets-btn" title="Command snippets" aria-label="Command snippets">&#187;_</button>
+      <button id="recorder-btn" title="Session recording" aria-label="Session recording">&#9679;</button>
+      <button id="upload-btn" title="Upload file" aria-label="Upload file">&#8679;</button>
+      <button id="download-btn" title="Download file" aria-label="Download file">&#8681;</button>
+      <button id="settings-btn" title="Settings" aria-label="Settings">&#9881;</button>
+      <button id="logout-btn" title="Logout" aria-label="Logout">Logout</button>
+    </div>
+  </header>
+  <main id="terms"></main>
+  <div id="searchbar" class="hidden"></div>
+  <div id="mobile-bar"></div>
+  <div id="filebrowser-panel" class="hidden"></div>
+  <div id="snippets-modal" class="hidden"></div>
+  <div id="recorder-modal" class="hidden"></div>
+  <div id="settings-panel" class="hidden"></div>
+  <input type="file" id="upload-input" multiple hidden>
+  <div id="toast" class="hidden"></div>
+  <script src="/vendor/xterm/lib/xterm.js"></script>
+  <script src="/vendor/addon-fit/lib/addon-fit.js"></script>
+  <script src="/vendor/addon-web-links/lib/addon-web-links.js"></script>
+  <script src="/vendor/addon-search/lib/addon-search.js"></script>
+  <script src="/vendor/addon-webgl/lib/addon-webgl.js"></script>
+  <script src="/static/js/themes.js"></script>
+  <script src="/static/js/term.js"></script>
+  <script src="/static/js/mobilebar.js"></script>
+  <script src="/static/js/searchbar.js"></script>
+  <script src="/static/js/filebrowser.js"></script>
+  <script src="/static/js/snippets.js"></script>
+  <script src="/static/js/recorder.js"></script>
+  <script src="/static/js/clipboard.js"></script>
+  <script src="/static/js/pwa.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

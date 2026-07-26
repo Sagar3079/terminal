@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WebTerm — Login</title>
+  <link rel="icon" href="/icons/icon.svg">
+  <link rel="stylesheet" href="/static/css/login.css">
+</head>
+<body>
+  <main class="login-wrap">
+    <form id="login-form" class="login-card" autocomplete="on">
+      <h1 class="app-name">WebTerm</h1>
+      <p class="tagline">Sign in to your terminal</p>
+      <label class="field-label" for="password">Password</label>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        autofocus
+        required
+        autocomplete="current-password"
+        placeholder="Password">
+      <button id="login-btn" type="submit">Sign in</button>
+      <p id="error" class="error" role="alert" aria-live="polite"></p>
+    </form>
+  </main>
+
+  <script>
+    (function () {
+      var form = document.getElementById('login-form');
+      var input = document.getElementById('password');
+      var button = document.getElementById('login-btn');
+      var errorEl = document.getElementById('error');
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        errorEl.textContent = '';
+        button.disabled = true;
+
+        fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: input.value })
+        })
+          .then(function (res) {
+            return res.json().catch(function () { return {}; }).then(function (data) {
+              if (res.ok && data.ok) {
+                location.href = '/';
+                return;
+              }
+              errorEl.textContent = data.error || 'Login failed. Please try again.';
+              button.disabled = false;
+              input.select();
+              input.focus();
+            });
+          })
+          .catch(function () {
+            errorEl.textContent = 'Network error. Please try again.';
+            button.disabled = false;
+          });
+      });
+    })();
+  </script>
+</body>
+</html>

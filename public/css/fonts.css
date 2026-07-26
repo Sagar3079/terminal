@@ -1,0 +1,33 @@
+/* Bundled monospace fonts, served from @fontsource packages via vendor mounts. */
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/vendor/fonts-jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/vendor/fonts-jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'Fira Code';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/vendor/fonts-fira-code/files/fira-code-latin-400-normal.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'Fira Code';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/vendor/fonts-fira-code/files/fira-code-latin-700-normal.woff2) format('woff2');
+}
