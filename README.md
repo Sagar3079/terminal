@@ -12,6 +12,8 @@ No build step, no frontend framework. Plain Node.js + Express + WebSockets + xte
 - **Themes** — dark, light, Dracula, Solarized Dark, and Monokai, plus adjustable font size
 - **Password login** — bcrypt-hashed password, rate-limited login, session cookies
 - **Auto-reconnect** — flaky wifi? The client re-attaches with exponential backoff
+- **File transfer** — upload files from your device to the server and download files back, right from the toolbar
+- **Built-in HTTPS** — bring your own certificate or let WebTerm generate a self-signed one
 
 ## Quick start
 
@@ -38,6 +40,29 @@ WEBTERM_PASSWORD='your-secret-password' npm start
 
 Tip: "Add to Home Screen" in your mobile browser gives you an app-like fullscreen terminal.
 
+## File transfer
+
+- **Upload (⇧)**: pick one or more files from your device; they're saved to your home directory on the server (change with `WEBTERM_UPLOAD_DIR`). Uploads are capped at 1 GiB per file by default (`WEBTERM_MAX_UPLOAD_MB`).
+- **Download (⇩)**: enter a file path (absolute, or relative to home, `~` works) and the file is sent to your browser's downloads.
+
+Both endpoints require a logged-in session.
+
+## HTTPS
+
+Three ways to run WebTerm over TLS:
+
+```bash
+# 1. Your own certificate (e.g. from Let's Encrypt or your CA)
+WEBTERM_TLS_CERT=/path/to/fullchain.pem WEBTERM_TLS_KEY=/path/to/privkey.pem npm start
+
+# 2. Auto-generated self-signed certificate (stored in data/tls/, requires openssl)
+WEBTERM_TLS=selfsigned npm start
+```
+
+3. Or terminate TLS in front of WebTerm with a reverse proxy / tunnel (see Security below).
+
+With a self-signed certificate your browser shows a one-time warning — expected, since nobody vouches for the cert. The connection is still encrypted. For phones this beats plain HTTP on any network you don't fully trust.
+
 ## Security
 
 WebTerm gives whoever logs in **a full shell on your machine**. Treat it accordingly:
@@ -58,6 +83,10 @@ WebTerm gives whoever logs in **a full shell on your machine**. Treat it accordi
 | `HOST` | `0.0.0.0` | Listen address (`127.0.0.1` to restrict to localhost) |
 | `WEBTERM_SHELL` | `$SHELL` or `/bin/bash` | Shell to spawn for each terminal session |
 | `WEBTERM_PASSWORD` | – | If no password is set yet, sets it on startup (handy for containers) |
+| `WEBTERM_UPLOAD_DIR` | `$HOME` | Directory where uploaded files are saved |
+| `WEBTERM_MAX_UPLOAD_MB` | `1024` | Maximum upload size in MiB |
+| `WEBTERM_TLS_CERT` / `WEBTERM_TLS_KEY` | – | Paths to a TLS certificate and key; set both to serve HTTPS |
+| `WEBTERM_TLS` | – | Set to `selfsigned` to auto-generate a certificate into `data/tls/` |
 
 State lives in `data/` (password hash and session secret), created automatically with restrictive permissions.
 

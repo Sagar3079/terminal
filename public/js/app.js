@@ -119,6 +119,64 @@
       settingsPanel.classList.toggle('hidden');
     });
 
+    // --- File transfer ---
+    var toastEl = document.getElementById('toast');
+    var toastTimer = null;
+    function toast(msg, isError) {
+      toastEl.textContent = msg;
+      toastEl.classList.toggle('error', !!isError);
+      toastEl.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () {
+        toastEl.classList.add('hidden');
+      }, 4000);
+    }
+
+    var uploadInput = document.getElementById('upload-input');
+    document.getElementById('upload-btn').addEventListener('click', function () {
+      uploadInput.click();
+    });
+    uploadInput.addEventListener('change', function () {
+      var files = Array.prototype.slice.call(uploadInput.files);
+      uploadInput.value = '';
+      files.forEach(function (file) {
+        toast('Uploading ' + file.name + '…');
+        fetch('/api/upload?name=' + encodeURIComponent(file.name), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/octet-stream' },
+          body: file
+        })
+          .then(function (res) { return res.json().catch(function () { return {}; }).then(function (d) { return { res: res, d: d }; }); })
+          .then(function (r) {
+            if (r.res.ok && r.d.ok) {
+              toast('Uploaded to ' + r.d.path);
+            } else {
+              toast('Upload failed: ' + (r.d.error || r.res.status), true);
+            }
+          })
+          .catch(function () { toast('Upload failed: network error', true); });
+      });
+    });
+
+    document.getElementById('download-btn').addEventListener('click', function () {
+      var p = prompt('File path to download (absolute, or relative to home):', '~/');
+      if (!p) return;
+      fetch('/api/download?path=' + encodeURIComponent(p), { method: 'HEAD' })
+        .catch(function () { return null; })
+        .then(function (res) {
+          if (res && !res.ok) {
+            toast('Download failed: file not found', true);
+            return;
+          }
+          var a = document.createElement('a');
+          a.href = '/api/download?path=' + encodeURIComponent(p);
+          a.download = '';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        });
+    });
+
     window.initMobileBar(document.getElementById('mobile-bar'), function () {
       return activeTab && activeTab.term;
     });

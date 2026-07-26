@@ -1,6 +1,7 @@
 'use strict';
 
 const http = require('http');
+const https = require('https');
 const path = require('path');
 const express = require('express');
 const { WebSocketServer } = require('ws');
@@ -16,6 +17,8 @@ const {
 } = require('./lib/auth');
 const { PtyManager } = require('./lib/pty-manager');
 const { handleConnection } = require('./lib/ws-handler');
+const { handleUpload, handleDownload } = require('./lib/files');
+const { loadTlsOptions } = require('./lib/tls');
 
 async function main() {
   const config = loadConfig();
@@ -91,7 +94,12 @@ async function main() {
     res.json({ sessions: ptyManager.list() });
   });
 
-  const server = http.createServer(app);
+  app.post('/api/upload', requireAuth, (req, res) => handleUpload(req, res, config));
+  app.get('/api/download', requireAuth, (req, res) => handleDownload(req, res));
+
+  const tlsOptions = loadTlsOptions(config);
+  const server = tlsOptions ? https.createServer(tlsOptions, app) : http.createServer(app);
+  const scheme = tlsOptions ? 'https' : 'http';
   const wss = new WebSocketServer({ noServer: true });
 
   server.on('upgrade', (req, socket, head) => {
@@ -114,7 +122,10 @@ async function main() {
   });
 
   server.listen(config.port, config.host, () => {
-    console.log(`WebTerm listening on http://${config.host}:${config.port}`);
+    console.log(`WebTerm listening on ${scheme}://${config.host}:${config.port}`);
+    if (config.tlsSelfSigned) {
+      console.log('Using a self-signed certificate — browsers will show a warning on first visit.');
+    }
   });
 }
 
