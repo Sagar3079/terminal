@@ -13,7 +13,18 @@ No build step, no frontend framework. Plain Node.js + Express + WebSockets + xte
 - **Password login** — bcrypt-hashed password, rate-limited login, session cookies
 - **Auto-reconnect** — flaky wifi? The client re-attaches with exponential backoff
 - **File transfer** — upload files from your device to the server and download files back, right from the toolbar
+- **File browser** — slide-out panel to browse server files, download with a tap, and upload into any directory
 - **Built-in HTTPS** — bring your own certificate or let WebTerm generate a self-signed one
+- **Split panes** — split any terminal horizontally or vertically (up to 4 panes per tab)
+- **Tab renaming** — double-click (or long-press) a tab title; names are stored server-side and survive reconnects
+- **Search** — Ctrl+F searches the scrollback of the active terminal
+- **Command snippets** — save commands you type often and run them from a palette (great on phones)
+- **Session recording** — record terminals to asciinema-compatible `.cast` files and replay them in the browser
+- **Activity & bell badges** — background tabs light up when output or a bell arrives
+- **Copy button** — one tap to copy the current terminal selection (handy on mobile)
+- **Bundled fonts & more themes** — JetBrains Mono and Fira Code ship with the app; 10 themes plus a custom theme editor
+- **PWA** — install to your phone's home screen for a fullscreen, app-like terminal
+- **WebGL rendering** — smooth scrolling for heavy output, with automatic DOM fallback
 
 ## Quick start
 

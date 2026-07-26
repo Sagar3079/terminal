@@ -1,10 +1,31 @@
-/* global Terminal, FitAddon, WebLinksAddon, THEMES */
+/* global Terminal, FitAddon, WebLinksAddon, SearchAddon, WebglAddon, THEMES */
 /* TermSession: one xterm.js terminal bound to one server PTY session over a WebSocket. */
 (function () {
   'use strict';
 
   var MIN_BACKOFF = 500;
   var MAX_BACKOFF = 8000;
+  var ACTIVITY_THROTTLE_MS = 300;
+  var FALLBACK_FONT_STACK = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+
+  function resolveFontStack(fontFamily) {
+    var fonts = window.FONTS;
+    if (fonts) {
+      if (fontFamily && typeof fonts[fontFamily] === 'string') return fonts[fontFamily];
+      if (typeof fonts.system === 'string') return fonts.system;
+    }
+    return FALLBACK_FONT_STACK;
+  }
+
+  function resolveTheme(settings) {
+    if (typeof window.getTheme === 'function') {
+      try {
+        var t = window.getTheme(settings);
+        if (t) return t;
+      } catch (e) { /* fall through to THEMES */ }
+    }
+    return (window.THEMES && (THEMES[settings.theme] || THEMES.dark)) || undefined;
+  }
 
   window.TermSession = class TermSession {
     constructor(holderEl, opts) {
@@ -13,6 +34,9 @@
       this._onTitle = opts.onTitle || function () {};
       this._onExit = opts.onExit || function () {};
       this._onConnChange = opts.onConnChange || function () {};
+      this._onBell = opts.onBell || null;
+      this._onActivity = opts.onActivity || null;
+      this._lastActivityAt = 0;
 
       this._ws = null;
       this._disposed = false;
@@ -26,14 +50,26 @@
       this.term = new Terminal({
         cursorBlink: true,
         fontSize: opts.settings.fontSize,
-        theme: THEMES[opts.settings.theme],
+        theme: resolveTheme(opts.settings),
         scrollback: 5000,
-        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'
+        fontFamily: resolveFontStack(opts.settings.fontFamily)
       });
       this.fitAddon = new FitAddon.FitAddon();
       this.term.loadAddon(this.fitAddon);
       this.term.loadAddon(new WebLinksAddon.WebLinksAddon());
+
+      this.searchAddon = null;
+      if (window.SearchAddon && SearchAddon.SearchAddon) {
+        try {
+          this.searchAddon = new SearchAddon.SearchAddon();
+          this.term.loadAddon(this.searchAddon);
+        } catch (e) {
+          this.searchAddon = null;
+        }
+      }
+
       this.term.open(holderEl);
+      this._loadWebgl();
 
       var self = this;
       this.term.onData(function (data) {
@@ -42,6 +78,46 @@
       this.term.onResize(function (size) {
         self._sendResize(size.cols, size.rows);
       });
+      this.term.onBell(function () {
+        if (self._onBell) {
+          try { self._onBell(); } catch (e) { /* callback errors must not break IO */ }
+        }
+      });
+    }
+
+    // WebGL renderer with silent fallback to the DOM renderer.
+    _loadWebgl() {
+      if (!window.WebglAddon || !WebglAddon.WebglAddon) return;
+      var self = this;
+      var addon;
+      try {
+        addon = new WebglAddon.WebglAddon();
+        if (typeof addon.onContextLoss === 'function') {
+          addon.onContextLoss(function () {
+            self._disposeWebgl();
+          });
+        }
+        this.term.loadAddon(addon);
+        this._webglAddon = addon;
+      } catch (e) {
+        this._webglAddon = addon || null;
+        this._disposeWebgl();
+      }
+    }
+
+    _disposeWebgl() {
+      var addon = this._webglAddon;
+      this._webglAddon = null;
+      if (!addon) return;
+      try { addon.dispose(); } catch (e) { /* already gone */ }
+    }
+
+    _notifyActivity() {
+      if (!this._onActivity) return;
+      var now = Date.now();
+      if (now - this._lastActivityAt < ACTIVITY_THROTTLE_MS) return;
+      this._lastActivityAt = now;
+      try { this._onActivity(); } catch (e) { /* callback errors must not break IO */ }
     }
 
     get id() {
@@ -118,6 +194,7 @@
           break;
         case 'output':
           if (typeof msg.data === 'string') this.term.write(msg.data);
+          this._notifyActivity();
           break;
         case 'exit':
           this._handleExit();
@@ -194,9 +271,53 @@
       this._send({ type: 'input', data: data });
     }
 
+    _search(query, backwards) {
+      if (!this.searchAddon || !query) return false;
+      var method = backwards ? 'findPrevious' : 'findNext';
+      var opts = {
+        decorations: {
+          matchOverviewRuler: '#f2cc60',
+          activeMatchColorOverviewRuler: '#f2cc60'
+        }
+      };
+      try {
+        return !!this.searchAddon[method](query, opts);
+      } catch (e) {
+        // Older addon builds may reject decoration options; retry bare.
+        try {
+          return !!this.searchAddon[method](query);
+        } catch (e2) {
+          return false;
+        }
+      }
+    }
+
+    findNext(query) {
+      return this._search(query, false);
+    }
+
+    findPrevious(query) {
+      return this._search(query, true);
+    }
+
+    clearSearch() {
+      if (this.searchAddon && typeof this.searchAddon.clearDecorations === 'function') {
+        try { this.searchAddon.clearDecorations(); } catch (e) { /* ignore */ }
+      }
+    }
+
+    getSelection() {
+      return this.term.getSelection();
+    }
+
+    hasSelection() {
+      return this.term.hasSelection();
+    }
+
     applySettings(settings) {
-      this.term.options.theme = THEMES[settings.theme];
+      this.term.options.theme = resolveTheme(settings);
       this.term.options.fontSize = settings.fontSize;
+      this.term.options.fontFamily = resolveFontStack(settings.fontFamily);
       this.fit();
     }
 
