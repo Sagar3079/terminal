@@ -105,6 +105,34 @@ body {
   color: #f85149;
 }
 
+/* Badges set by app.js when a background tab has output / rings the bell */
+.tab.activity .tab-title::after {
+  content: '•';
+  color: #3fb950;
+  font-weight: 700;
+  margin-left: 5px;
+}
+
+.tab.bell .tab-title::after {
+  content: '🔔';
+  font-size: 10px;
+  margin-left: 5px;
+}
+
+/* Inline tab rename input (dblclick / long-press on a tab title) */
+.tab-rename-input {
+  width: 120px;
+  height: 24px;
+  padding: 0 6px;
+  border: 1px solid #1f6feb;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.45);
+  color: var(--fg);
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
 .tab-close {
   flex: 0 0 auto;
   width: 22px;
@@ -147,13 +175,24 @@ body {
 }
 
 #topbar-actions {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-width: 0;
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+#topbar-actions::-webkit-scrollbar {
+  display: none;
 }
 
 #topbar-actions button {
+  flex: 0 0 auto;
   height: 34px;
   min-width: 34px;
   padding: 0 10px;
@@ -168,6 +207,15 @@ body {
 
 #topbar-actions button:hover {
   background: rgba(128, 128, 128, 0.18);
+}
+
+#topbar-actions button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+#topbar-actions button:disabled:hover {
+  background: transparent;
 }
 
 #settings-btn {
@@ -187,6 +235,8 @@ body {
   inset: 0;
   padding: 4px 2px 4px 6px;
   overflow: hidden;
+  /* Flex root for the split-pane tree */
+  display: flex;
 }
 
 .term-holder.hidden {
@@ -196,6 +246,41 @@ body {
 .term-holder .terminal,
 .term-holder .xterm {
   height: 100%;
+}
+
+/* ---------- Split panes ---------- */
+
+.pane {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.pane-split {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  gap: 2px;
+  background: rgba(128, 128, 128, 0.25);
+}
+
+.pane-split.h {
+  flex-direction: row;
+}
+
+.pane-split.v {
+  flex-direction: column;
+}
+
+/* Highlight the focused pane only when the tab actually has several panes */
+.term-holder.multi .pane.active {
+  outline: 1px solid #1f6feb;
+  outline-offset: -1px;
+  z-index: 1;
 }
 
 /* ---------- Mobile key bar ---------- */
